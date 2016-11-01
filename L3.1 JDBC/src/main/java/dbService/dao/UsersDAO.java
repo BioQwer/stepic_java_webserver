@@ -1,10 +1,10 @@
 package dbService.dao;
 
-import dbService.dataSets.UsersDataSet;
-import dbService.executor.Executor;
-
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import dbService.dataSets.UsersDataSet;
+import dbService.executor.Executor;
 
 /**
  * @author v.chibrikov
@@ -13,19 +13,12 @@ import java.sql.SQLException;
  *         <p>
  *         Описание курса и лицензия: https://github.com/vitaly-chibrikov/stepic_java_webserver
  */
-public class UsersDAO {
+public class UsersDAO implements DAO<UsersDataSet> {
 
     private Executor executor;
 
     public UsersDAO(Connection connection) {
         this.executor = new Executor(connection);
-    }
-
-    public UsersDataSet get(long id) throws SQLException {
-        return executor.execQuery("select * from users where id=" + id, result -> {
-            result.next();
-            return new UsersDataSet(result.getLong(1), result.getString(2));
-        });
     }
 
     public long getUserId(String name) throws SQLException {
@@ -36,14 +29,63 @@ public class UsersDAO {
     }
 
     public void insertUser(String name) throws SQLException {
-        executor.execUpdate("insert into users (user_name) values ('" + name + "')");
+        executor.execStatement("insert into users (user_name) values ('" + name + "')");
     }
 
     public void createTable() throws SQLException {
-        executor.execUpdate("create table if not exists users (id bigint auto_increment, user_name varchar(256), primary key (id))");
+        executor.execStatement("create table if not exists " +
+                                       "users (id bigint auto_increment, " +
+                                       "login varchar(256), " +
+                                       "password varchar(256), " +
+                                       "primary key (id));");
     }
 
     public void dropTable() throws SQLException {
-        executor.execUpdate("drop table users");
+        executor.execStatement("drop table users");
+    }
+
+    @Override
+    public UsersDataSet create(UsersDataSet usersDataSet) throws SQLException {
+        return executor.execQuery(
+                String.format("INSERT INTO users (login, password) VALUE ('%s', '%s');" +
+                                      "SELECT last_insert_id();",
+                              usersDataSet.getLogin(),
+                              usersDataSet.getPassword()),
+                result -> {
+                    result.next();
+                    usersDataSet.setId(result.getLong(1));
+                    return usersDataSet;
+                }
+        );
+    }
+
+    @Override
+    public UsersDataSet read(Long id) throws SQLException {
+        return executor.execQuery("select * from users where id=" + id, result -> {
+            result.next();
+            return new UsersDataSet(id, result.getString(1), result.getString(2));
+        });
+    }
+
+    public UsersDataSet read(String name) throws SQLException {
+        return executor.execQuery("select * from users where login=" + name, result -> {
+            result.next();
+            return new UsersDataSet(result.getLong(1), result.getString(2), result.getString(3));
+        });
+    }
+
+    @Override
+    public UsersDataSet update(UsersDataSet usersDataSet) throws SQLException {
+        executor.execStatement("UPDATE users" +
+                                       "SET login = '" + usersDataSet.getLogin() + "', " +
+                                       "password = '" + usersDataSet.getPassword() + "'" +
+                                       "WHERE id = " + usersDataSet.getId() + ";");
+        return usersDataSet;
+    }
+
+    @Override
+    public boolean delete(Long id) throws SQLException {
+        executor.execStatement("DELETE FROM users where id = " + id);
+        return true;
     }
 }

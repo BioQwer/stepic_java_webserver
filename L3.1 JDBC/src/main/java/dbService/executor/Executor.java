@@ -19,7 +19,7 @@ public class Executor {
         this.connection = connection;
     }
 
-    public void execUpdate(String update) throws SQLException {
+    public void execStatement(String update) throws SQLException {
         Statement stmt = connection.createStatement();
         stmt.execute(update);
         stmt.close();
@@ -34,7 +34,6 @@ public class Executor {
         T value = handler.handle(result);
         result.close();
         stmt.close();
-
         return value;
     }
 
