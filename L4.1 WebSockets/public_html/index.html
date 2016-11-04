@@ -8,16 +8,17 @@
         function init() {
             ws = new WebSocket("ws://localhost:8080/chat");
             ws.onopen = function (event) {
-
-            }
+                console.log('open connection');
+            };
             ws.onmessage = function (event) {
+                console.log(event);
                 var $textarea = document.getElementById("messages");
                 $textarea.value = $textarea.value + event.data + "\n";
-            }
+            };
             ws.onclose = function (event) {
-
+                console.log('close connection');
             }
-        };
+        }
 
         function sendMessage() {
             var messageField = document.getElementById("message");
@@ -39,7 +40,7 @@
     </div>
 
     <div id="chatbox">
-        <textarea id="messages" rows="20" cols="50" readonly="readonly"></textarea>
+        <label for="messages"></label><textarea id="messages" rows="20" cols="50" readonly="readonly"></textarea>
     </div>
 
     <form name="message" action="">

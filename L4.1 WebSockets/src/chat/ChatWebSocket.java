@@ -1,5 +1,7 @@
 package chat;
 
+import java.io.IOException;
+
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -30,8 +32,11 @@ public class ChatWebSocket {
     }
 
     @OnWebSocketMessage
-    public void onMessage(String data) {
-        chatService.sendMessage(data);
+    public void onMessage(Session session,
+                          String data) throws IOException {
+     //   session.getRemote().sendString(data);
+
+          chatService.sendMessage(data);
     }
 
     @OnWebSocketClose
@@ -42,6 +47,7 @@ public class ChatWebSocket {
     public void sendString(String data) {
         try {
             session.getRemote().sendString(data);
+            System.out.println(data);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
