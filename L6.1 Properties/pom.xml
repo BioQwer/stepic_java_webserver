@@ -8,5 +8,10 @@
     <artifactId>L6.1</artifactId>
     <version>1.0</version>
 
+    <parent>
+        <groupId>stepic.java</groupId>
+        <artifactId>base</artifactId>
+        <version>1.0</version>
+    </parent>
 
 </project>
