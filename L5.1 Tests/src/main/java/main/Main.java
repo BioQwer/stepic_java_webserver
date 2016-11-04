@@ -1,9 +1,9 @@
-package example;
+package main;
 
-import accountServer.AccountServer;
-import accountServer.AccountServerController;
-import accountServer.AccountServerControllerMBean;
-import accountServer.AccountServerI;
+import java.lang.management.ManagementFactory;
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
@@ -12,11 +12,12 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.server.handler.ResourceHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import servlets.HomePageServlet;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-import java.lang.management.ManagementFactory;
+import accountServer.AccountServer;
+import accountServer.AccountServerController;
+import accountServer.AccountServerControllerMBean;
+import accountServer.AccountServerI;
+import servlets.HomePageServlet;
 
 /**
  * @author a.akbashev
@@ -44,7 +45,7 @@ public class Main {
 
         AccountServerControllerMBean serverStatistics = new AccountServerController(accountServer);
         MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("ServerManager:type=AccountServerController");
+        ObjectName name = new ObjectName("ServerManager:type=AccountServerController.usersLimit");
         mbs.registerMBean(serverStatistics, name);
 
         Server server = new Server(port);
@@ -60,7 +61,7 @@ public class Main {
         server.setHandler(handlers);
 
         server.start();
-        logger.info("Server started");
+        System.out.println("Server started");
 
         server.join();
     }
