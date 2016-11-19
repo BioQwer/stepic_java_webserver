@@ -1,7 +1,11 @@
 package main;
 
 import java.lang.management.ManagementFactory;
+import javax.management.InstanceAlreadyExistsException;
+import javax.management.MBeanRegistrationException;
 import javax.management.MBeanServer;
+import javax.management.MalformedObjectNameException;
+import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
 import org.apache.logging.log4j.LogManager;
@@ -30,6 +34,14 @@ import servlets.HomePageServlet;
 public class Main {
     static final Logger logger = LogManager.getLogger(Main.class.getName());
 
+    private static void createAndRegisterJMXBean(AccountServerI accountServer) throws MalformedObjectNameException, InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+
+        AccountServerControllerMBean serverStatistics = new AccountServerController(accountServer);
+        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+        ObjectName name = new ObjectName("ServerManager:type=AccountServerController.usersLimit");
+        mbs.registerMBean(serverStatistics, name);
+    }
+
     public static void main(String[] args) throws Exception {
         if (args.length != 1) {
             logger.error("Use port as the first argument");
@@ -43,10 +55,7 @@ public class Main {
 
         AccountServerI accountServer = new AccountServer(1);
 
-        AccountServerControllerMBean serverStatistics = new AccountServerController(accountServer);
-        MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
-        ObjectName name = new ObjectName("ServerManager:type=AccountServerController.usersLimit");
-        mbs.registerMBean(serverStatistics, name);
+        createAndRegisterJMXBean(accountServer);
 
         Server server = new Server(port);
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
